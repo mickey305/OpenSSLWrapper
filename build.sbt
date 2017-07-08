@@ -6,7 +6,7 @@ lazy val commonSettings = Seq(
 lazy val root = (project in file(".")).
   settings(commonSettings: _*).
   settings(
-    name := "OpenSSLWrapper Root Project",
+    name := "OpenSSLWrapper Project",
     scalacOptions += "-deprecation"
   ).aggregate(sample, opensslwrapper)
 
@@ -20,7 +20,8 @@ lazy val sample = (project in file("sample")).
       "jitpack" at "https://jitpack.io"
     ),
     libraryDependencies ++= Seq(
-      "com.github.mickey305" % "Jclic" % "0.1.5_12"
+      "com.github.mickey305" % "Jclic" % "0.1.5_12",
+      "com.typesafe.akka" %% "akka-actor" % "2.4.12"
     )
   )
 
@@ -35,9 +36,11 @@ lazy val opensslwrapper = (project in file("opensslwrapper")).
     ),
     libraryDependencies ++= Seq(
       "com.typesafe" % "config" % "1.3.1",
-      "com.github.mickey305" % "Jclic" % "0.1.5_12",
+      "com.github.mickey305" % "Jclic" % "0.1.5_13",
       "com.github.mickey305" % "FileCompressFramework" % "0.0.2-SNAPSHOT",
       // https://mvnrepository.com/artifact/commons-io/commons-io
-      "commons-io" % "commons-io" % "2.5"
+      "commons-io" % "commons-io" % "2.5",
+      // https://mvnrepository.com/artifact/org.apache.commons/commons-lang3
+      "org.apache.commons" % "commons-lang3" % "3.5"
     )
   )
