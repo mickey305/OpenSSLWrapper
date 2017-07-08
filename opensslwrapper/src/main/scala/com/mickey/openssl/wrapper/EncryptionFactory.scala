@@ -1,8 +1,15 @@
 package com.mickey.openssl.wrapper
 
 import java.io.File
+import java.nio.file.attribute.PosixFilePermissions
+import java.nio.file.{Files, Paths}
+import java.text.SimpleDateFormat
+import java.util.Calendar
 
-import com.mickey.openssl.wrapper.config.model.Contents
+import com.mickey.openssl.wrapper.actor.utils.IdCache
+import com.mickey.openssl.wrapper.config.model.{Contents, OpenSSL}
+import com.mickey.openssl.wrapper.exception.FilePathException
+import com.mickey.openssl.wrapper.exception.model.PathType
 import com.mickey305.util.cli.JournalManager
 import com.mickey305.util.cli.receivers.ResultAccessibleReceiver
 import com.mickey305.util.file.zip.ZipComponent
@@ -13,45 +20,58 @@ import org.apache.commons.io.FileUtils
   *
   */
 class EncryptionFactory {
-  val encryptionTaskManager = new EncryptionTaskManager
+  val cliTskMngr = new EncryptionTaskManager
+  val opensslCfg: OpenSSL = new OpenSSL
   var packageFilePath: String = _
 
   private val encryptionFileExt = ".encrypted"
-  private val tmpDirPath = System.getProperty("java.io.tmpdir") + this.getClass.getName + File.separator
+  private val tmpRootDirPath = getSystemTmpDir +
+    "work" + createUniqueTime("yyyyMMddHHmmssSSS") + File.separator
+  private val tmpDirPath = tmpRootDirPath + this.getClass.getName + File.separator
   private val contentsFilePath = tmpDirPath + "contents" + encryptionFileExt
-  private val contentsConfig = new Contents
+  private val contentsCfg = new Contents
 
-  encryptionTaskManager.receiver = new ResultAccessibleReceiver
-  encryptionTaskManager.journalManager = new JournalManager
+  // default setting
+  opensslCfg.shareKey = createUniqueTime("yyyyMMddHHmmssSSS") + ".share.key"
+  opensslCfg.algorithm = "aes-256-cbc"
+  opensslCfg.base64 = false
+  cliTskMngr.receiver = new ResultAccessibleReceiver
+  cliTskMngr.journalManager = new JournalManager
 
   /**
     *
     * @param targetFilePath
+    * @throws com.mickey.openssl.wrapper.exception.FilePathException
     */
+  @throws(classOf[FilePathException])
   def pack(targetFilePath: String): Unit ={
-    if (packageFilePath == null || packageFilePath.isEmpty) return
-    if (encryptionTaskManager.opensslConfig.publicKey == null) return
-    if (encryptionTaskManager.opensslConfig.publicKey.isEmpty) return
-    encryptionTaskManager.cancelAll()
+    if (packageFilePath == null || packageFilePath.isEmpty)
+      throw new FilePathException("error occurred.", PathType.Package)
+    if (opensslCfg.publicKey == null)
+      throw new FilePathException("error occurred.", PathType.PublicKey)
+    if (opensslCfg.publicKey.isEmpty)
+      throw new FilePathException("error occurred.", PathType.PublicKey)
+    cliTskMngr.cancelAll()
 
-    val shareKeyPath = tmpDirPath + encryptionTaskManager.opensslConfig.shareKey
+    val shareKeyPath = tmpDirPath + opensslCfg.shareKey
     val encShareKeyPath = shareKeyPath + encryptionFileExt
-    val publicKeyPath = encryptionTaskManager.opensslConfig.publicKey
-    encryptionTaskManager.subscribeShareKeyCreator(shareKeyPath)
-    encryptionTaskManager.subscribePKeyEncryption(publicKeyPath, shareKeyPath, encShareKeyPath)
-    encryptionTaskManager.subscribeShareKeyEncryption(shareKeyPath, targetFilePath, contentsFilePath)
+    val publicKeyPath = opensslCfg.publicKey
+    cliTskMngr.subscribeShareKeyCreator(opensslCfg, shareKeyPath)
+    cliTskMngr.subscribePKeyEncryption(opensslCfg, publicKeyPath, shareKeyPath, encShareKeyPath)
+    cliTskMngr.subscribeShareKeyEncryption(opensslCfg, shareKeyPath, targetFilePath, contentsFilePath)
 
-    tmpTask(createFolder(tmpDirPath)) { _ =>
+    tmpTask() { _ =>
+      createFolder(tmpDirPath)
       // Encryption Task
       // execution
-      encryptionTaskManager.invoke()
+      cliTskMngr.invoke()
       // execution
-      encryptionTaskManager.opensslConfig.version = encryptionTaskManager.opensslVersion()
-      encryptionTaskManager.opensslConfig.path = tmpDirPath
-      encryptionTaskManager.opensslConfig.save
-      contentsConfig.path = tmpDirPath
-      contentsConfig.fileName = targetFilePath.split(File.separator).last
-      contentsConfig.save
+      opensslCfg.version = cliTskMngr.opensslVersion()
+      opensslCfg.path = tmpDirPath
+      opensslCfg.save
+      contentsCfg.path = tmpDirPath
+      contentsCfg.fileName = targetFilePath.split(File.separator).last
+      contentsCfg.save
       val shareKey = new File(shareKeyPath)
       val delete = shareKey.delete
 
@@ -63,53 +83,71 @@ class EncryptionFactory {
   /**
     *
     * @param outDirPath
+    * @throws com.mickey.openssl.wrapper.exception.FilePathException
     */
-  def unpack(outDirPath: String): Unit ={
-    if (packageFilePath == null || packageFilePath.isEmpty) return
-    if (encryptionTaskManager.opensslConfig.privateKey == null) return
-    if (encryptionTaskManager.opensslConfig.privateKey.isEmpty) return
-    encryptionTaskManager.cancelAll()
+  @throws(classOf[FilePathException])
+  def unpack(outDirPath: String, callbackVersionConflict: Option[Unit => Boolean] = None): Unit ={
+    if (packageFilePath == null || packageFilePath.isEmpty)
+      throw new FilePathException("error occurred.", PathType.Package)
+    if (opensslCfg.privateKey == null)
+      throw new FilePathException("error occurred.", PathType.PrivateKey)
+    if (opensslCfg.privateKey.isEmpty)
+      throw new FilePathException("error occurred.", PathType.PrivateKey)
+    cliTskMngr.cancelAll()
     val outPath = if (outDirPath.endsWith(File.separator)) outDirPath else outDirPath + File.separator
 
-    // UnZIP
-    ZipComponent.decompress(packageFilePath, new File(tmpDirPath).getParent, (_, _) => {
-      tmpTask() { _ =>
+    tmpTask() { _ =>
+      // UnZIP
+      ZipComponent.decompress(packageFilePath, tmpRootDirPath, (_, _) => {
+        val privateKeyPath = opensslCfg.privateKey
         // Decryption Task
-        encryptionTaskManager.opensslConfig.path = tmpDirPath
-        encryptionTaskManager.opensslConfig.load
-        contentsConfig.path = tmpDirPath
-        contentsConfig.load
+        opensslCfg.path = tmpDirPath
+        opensslCfg.load
+        contentsCfg.path = tmpDirPath
+        contentsCfg.load
         // execution
-        if (!encryptionTaskManager.opensslConfig.version.equals(encryptionTaskManager.opensslVersion())) return
-        val shareKeyPath = tmpDirPath + encryptionTaskManager.opensslConfig.shareKey
+        val version = opensslCfg.version
+        if (version == null || !version.equals(cliTskMngr.opensslVersion()))
+          callbackVersionConflict match {
+            case Some(status) => if(!status()) return }
+        val shareKeyPath = tmpDirPath + opensslCfg.shareKey
         val encShareKeyPath = shareKeyPath + encryptionFileExt
-        val privateKeyPath = encryptionTaskManager.opensslConfig.privateKey
-        encryptionTaskManager.subscribePKeyDecryption(privateKeyPath, encShareKeyPath, shareKeyPath)
-        encryptionTaskManager.subscribeShareKeyDecryption(shareKeyPath, contentsFilePath, outPath + contentsConfig.fileName)
+        cliTskMngr.subscribePKeyDecryption(opensslCfg, privateKeyPath, encShareKeyPath, shareKeyPath)
+        cliTskMngr.subscribeShareKeyDecryption(opensslCfg, shareKeyPath, contentsFilePath, outPath + contentsCfg.fileName)
         // execution
-        encryptionTaskManager.invoke() }
-    }, null)
+        cliTskMngr.invoke()
+      }, null)
+    }
   }
 
   /**
     *
-    * @param status
     * @param op
     */
-  private def tmpTask(status: Boolean = true)(op: Unit => Unit) {
-    try if (status) op()
-    finally deleteFolder(tmpDirPath)
+  private def tmpTask()(op: String => Unit) {
+    try {
+      val created = createFolder(tmpRootDirPath)
+      if (created) op(tmpRootDirPath)
+    } finally {
+      deleteFolder(tmpRootDirPath)
+    }
   }
 
   /**
     *
     * @param folderName
+    * @param permission
     * @return
     */
-  private def createFolder(folderName: String): Boolean = {
+  private def createFolder(folderName: String, permission: String = "rwx------"): Boolean = {
     val folder = new File(folderName)
-    if (!folder.exists())
-      return folder.mkdirs()
+    if (!folder.exists) {
+      folder.getParentFile.mkdirs()
+      Files.createDirectory(
+        Paths.get(folder.getCanonicalPath),
+        PosixFilePermissions.asFileAttribute(PosixFilePermissions.fromString(permission)))
+      return folder.exists
+    }
     false
   }
 
@@ -120,5 +158,34 @@ class EncryptionFactory {
   private def deleteFolder(folderName: String): Unit = {
     val folder = new File(folderName)
     if (folder.isDirectory) FileUtils.deleteDirectory(folder)
+  }
+
+  /**
+    *
+    * @return
+    */
+  private def getSystemTmpDir = {
+    val tmpDir = System.getProperty("java.io.tmpdir")
+    if (tmpDir.endsWith(File.separator)) tmpDir else tmpDir + File.separator
+  }
+
+  /**
+    *
+    * @param format
+    * @return
+    */
+  private def createUniqueTime(format: String): String = {
+    val tryCount = 1000
+    val internalMilliSec = 1
+    val sdf = new SimpleDateFormat(format)
+    var key: String = null
+    0.until(tryCount).foreach { i =>
+      val cal = Calendar.getInstance
+      key = sdf.format(cal.getTime)
+      if (IdCache.setTmpDirName(key)) return key
+//      println(">>> CREATE TMP DIR RETRY [" + (i + 1) + "]: conflict directory name - work" + key)
+      Thread.sleep(internalMilliSec)
+    }
+    key
   }
 }

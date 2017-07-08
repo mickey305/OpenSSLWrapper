@@ -1,9 +1,7 @@
 package com.mickey.openssl.wrapper
 
-import java.text.SimpleDateFormat
-import java.util.Calendar
-
 import com.mickey.openssl.wrapper.config.model.OpenSSL
+import com.mickey.openssl.wrapper.model.OptionKey
 import com.mickey305.util.cli.commands.OpenSSLCommand
 import com.mickey305.util.cli.invokers.TermInvoker
 import com.mickey305.util.cli.model.TerminalCommandJournal
@@ -14,20 +12,22 @@ import com.mickey305.util.cli.{CliReceiver, JournalManager, TerminalCommand}
   * Created by K.Misaki on 2017/06/03.
   *
   */
-class EncryptionTaskManager {
+class EncryptionTaskManager(callbackCmdSearch: Option[Unit => OpenSSLCommand] = None) {
   var cmdStatus = false
-  var opensslConfig: OpenSSL = new OpenSSL
   var receiver: CliReceiver = _
   var journalManager: JournalManager = _
 
-  private val openssl = OpenSSLCommand.create(status => cmdStatus = status)
   private val leftHyphen = (v: String) => if (v.startsWith("-")) v else "-" + v
   private var invoker = new TermInvoker[TerminalCommand]
+  private var openssl: OpenSSLCommand = OpenSSLCommand.create(status => cmdStatus = status)
+  if (!cmdStatus) {
+    callbackCmdSearch match {
+      case Some(cmd) => {
+        openssl = cmd()
+        cmdStatus = openssl != null}}
+  }
 
-  // default setting
-  opensslConfig.shareKey = createUniqueTime("yyyyMMddHHmmssSSS") + ".share.key"
-  opensslConfig.algorithm = "aes-256-cbc"
-  opensslConfig.base64 = false
+  def this() = this(None)
 
   def invoke(): Unit = {
     invoker.setJournalManager(journalManager)
@@ -46,18 +46,21 @@ class EncryptionTaskManager {
     invoker = new TermInvoker[TerminalCommand]
   }
 
-  def subscribeShareKeyCreator(kPath: String): Unit = {
+  def subscribeShareKeyCreator(opensslConfig: OpenSSL, kPath: String, options: Map[OptionKey, String] = Map(
+    // default setting
+    OptionKey.ShareKeyLength -> 32.toString
+  )): Unit = {
     // openssl rand 32 -out {SHARE_KEY_FILE} [-base64]
     if (!cmdStatus) return
     val cmd = openssl.clone.receiver(receiver)
-      .option(opensslConfig.randValue, 32.toString)
+      .option(opensslConfig.randValue, options(OptionKey.ShareKeyLength))
       .option(leftHyphen.apply("out"), kPath)
     if (opensslConfig.base64)
       cmd.option(leftHyphen.apply(opensslConfig.base64Value))
     invoker.add(cmd)
   }
 
-  def subscribeShareKeyEncryption(kPath: String, inPath: String, outPath: String): Unit = {
+  def subscribeShareKeyEncryption(opensslConfig: OpenSSL, kPath: String, inPath: String, outPath: String): Unit = {
     // openssl {ALGORITHM} -e -in {ORIGINAL_FILE} -out {ENCRYPTION_FILE} -pass file:{SHARE_KEY_FILE} [-base64]
     if (!cmdStatus) return
     val cmd = openssl.clone.receiver(receiver)
@@ -70,7 +73,7 @@ class EncryptionTaskManager {
     invoker.add(cmd)
   }
 
-  def subscribeShareKeyDecryption(kPath: String, inPath: String, outPath: String): Unit = {
+  def subscribeShareKeyDecryption(opensslConfig: OpenSSL, kPath: String, inPath: String, outPath: String): Unit = {
     // openssl {ALGORITHM} -d -in {ENCRYPTION_FILE} -out {ORIGINAL_FILE} -pass file:{SHARE_KEY_FILE} [-base64]
     if (!cmdStatus) return
     val cmd = openssl.clone.receiver(receiver)
@@ -83,16 +86,19 @@ class EncryptionTaskManager {
     invoker.add(cmd)
   }
 
-  def subscribePrivateKeyCreator(privateKeyPath: String): Unit = {
+  def subscribePrivateKeyCreator(opensslConfig: OpenSSL, privateKeyPath: String, options: Map[OptionKey, String] = Map(
+    // default setting
+    OptionKey.PrivateKeyLength -> 2048.toString
+  )): Unit = {
     // openssl genrsa 2048 > {PRIVATE_PEM_FILE}
     if (!cmdStatus) return
     val cmd = openssl.clone.receiver(receiver)
-      .option(opensslConfig.genRsaValue, 2048.toString)
+      .option(opensslConfig.genRsaValue, options(OptionKey.PrivateKeyLength))
       .option(">", privateKeyPath)
     invoker.add(cmd)
   }
 
-  def subscribePublicKeyCreator(privateKeyPath: String, publicKeyPath: String): Unit = {
+  def subscribePublicKeyCreator(opensslConfig: OpenSSL, privateKeyPath: String, publicKeyPath: String): Unit = {
     // openssl rsa -in {PRIVATE_PEM_FILE} -pubout -out {PUBLIC_PEM_FILE}
     if (!cmdStatus) return
     val cmd = openssl.clone.receiver(receiver)
@@ -102,7 +108,7 @@ class EncryptionTaskManager {
     invoker.add(cmd)
   }
 
-  def subscribePKeyEncryption(kPath: String, inPath: String, outPath: String): Unit = {
+  def subscribePKeyEncryption(opensslConfig: OpenSSL, kPath: String, inPath: String, outPath: String): Unit = {
     // openssl rsautl -encrypt -pubin -inkey {PUBLIC_PEM_FILE} -in {ORIGINAL_FILE} -out {ENCRYPTION_FILE}
     if (!cmdStatus) return
     val cmd = openssl.clone.receiver(receiver)
@@ -114,7 +120,7 @@ class EncryptionTaskManager {
     invoker.add(cmd)
   }
 
-  def subscribePKeyDecryption(kPath: String, inPath: String, outPath: String): Unit = {
+  def subscribePKeyDecryption(opensslConfig: OpenSSL, kPath: String, inPath: String, outPath: String): Unit = {
     // openssl rsautl -decrypt -inkey {PRIVATE_PEM_FILE} -in {ENCRYPTION_FILE} -out {ORIGINAL_FILE}
     if (!cmdStatus) return
     val cmd = openssl.clone.receiver(receiver)
@@ -126,18 +132,13 @@ class EncryptionTaskManager {
   }
 
   def opensslVersion(): String ={
+    if (!cmdStatus) return null
     val receiver = new ResultAccessibleReceiver
-    val cmd = openssl.clone().receiver(receiver).option("version")
+    val cmd = openssl.clone.receiver(receiver).option("version")
     cmd.execute()
     // add journal
-    if(journalManager != null) journalManager.createAndAddJournal(cmd.getPid, receiver, cmd.getTimestampMap)
-    val cache = receiver.getResultCacheSet.stream.findFirst.get
-    cache.getResult
-  }
-
-  private def createUniqueTime(format: String): String = {
-    val cal = Calendar.getInstance
-    val sdf = new SimpleDateFormat(format)
-    sdf.format(cal.getTime)
+    if (journalManager != null) journalManager.createAndAddJournal(cmd.getPid, receiver, cmd.getTimestampMap)
+    val optCache = receiver.getResultCacheSet.stream.findFirst
+    if (optCache.isPresent) optCache.get.getResult else null
   }
 }
