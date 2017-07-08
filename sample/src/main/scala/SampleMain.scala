@@ -3,13 +3,13 @@ import java.io.File
 
 import akka.actor.{Actor, ActorSystem, Props}
 import akka.util.Timeout
-import com.mickey.openssl.wrapper.EncryptionFactory
 import com.mickey305.util.cli.model.Benchmark
 
 import scala.concurrent.{Await, Future}
 import scala.concurrent.duration._
 import akka.pattern.ask
-import com.mickey.openssl.wrapper.actor.utils.IdCache
+import com.mickey305.openssl.wrapper.EncryptionFactory
+import com.mickey305.openssl.wrapper.actor.utils.IdCache
 
 /**
   * Created by K.Misaki on 2017/06/01.

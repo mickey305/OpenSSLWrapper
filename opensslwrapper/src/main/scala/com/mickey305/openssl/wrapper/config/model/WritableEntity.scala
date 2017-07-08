@@ -1,9 +1,9 @@
-package com.mickey.openssl.wrapper.config.model
+package com.mickey305.openssl.wrapper.config.model
 
 import java.io.{File, PrintWriter}
 import java.util.Properties
 
-import com.mickey.openssl.wrapper.ConfigObject
+import com.mickey305.openssl.wrapper.ConfigObject
 
 /**
   * Created by K.Misaki on 2017/06/01.

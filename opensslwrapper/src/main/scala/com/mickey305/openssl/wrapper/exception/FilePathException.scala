@@ -1,6 +1,6 @@
-package com.mickey.openssl.wrapper.exception
+package com.mickey305.openssl.wrapper.exception
 
-import com.mickey.openssl.wrapper.exception.model.PathType
+import com.mickey305.openssl.wrapper.exception.model.PathType
 
 /**
   * Created by K.Misaki on 2017/06/20.

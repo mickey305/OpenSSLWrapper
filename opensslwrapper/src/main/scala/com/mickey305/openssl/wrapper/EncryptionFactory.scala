@@ -1,4 +1,4 @@
-package com.mickey.openssl.wrapper
+package com.mickey305.openssl.wrapper
 
 import java.io.File
 import java.nio.file.attribute.PosixFilePermissions
@@ -6,10 +6,11 @@ import java.nio.file.{Files, Paths}
 import java.text.SimpleDateFormat
 import java.util.Calendar
 
-import com.mickey.openssl.wrapper.actor.utils.IdCache
-import com.mickey.openssl.wrapper.config.model.{Contents, OpenSSL}
-import com.mickey.openssl.wrapper.exception.FilePathException
-import com.mickey.openssl.wrapper.exception.model.PathType
+import com.mickey305.openssl.wrapper.actor.utils.IdCache
+import com.mickey305.openssl.wrapper.config.model.{Contents, OpenSSL}
+import com.mickey305.openssl.wrapper.exception.FilePathException
+import com.mickey305.openssl.wrapper.exception.model.PathType
+import com.mickey305.openssl.wrapper.exception.model.PathType.{Package, PublicKey}
 import com.mickey305.util.cli.JournalManager
 import com.mickey305.util.cli.receivers.ResultAccessibleReceiver
 import com.mickey305.util.file.zip.ZipComponent
@@ -41,14 +42,14 @@ class EncryptionFactory {
   /**
     *
     * @param targetFilePath
-    * @throws com.mickey.openssl.wrapper.exception.FilePathException
+    * @throws com.mickey305.openssl.wrapper.exception.FilePathException
     */
   @throws(classOf[FilePathException])
   def pack(targetFilePath: String): Unit ={
     if (packageFilePath == null || packageFilePath.isEmpty)
-      throw new FilePathException("error occurred.", PathType.Package)
+      throw new FilePathException("error occurred.", Package)
     if (opensslCfg.publicKey == null)
-      throw new FilePathException("error occurred.", PathType.PublicKey)
+      throw new FilePathException("error occurred.", PublicKey)
     if (opensslCfg.publicKey.isEmpty)
       throw new FilePathException("error occurred.", PathType.PublicKey)
     cliTskMngr.cancelAll()
@@ -83,7 +84,8 @@ class EncryptionFactory {
   /**
     *
     * @param outDirPath
-    * @throws com.mickey.openssl.wrapper.exception.FilePathException
+    * @param callbackVersionConflict
+    * @throws com.mickey305.openssl.wrapper.exception.FilePathException
     */
   @throws(classOf[FilePathException])
   def unpack(outDirPath: String, callbackVersionConflict: Option[Unit => Boolean] = None): Unit ={

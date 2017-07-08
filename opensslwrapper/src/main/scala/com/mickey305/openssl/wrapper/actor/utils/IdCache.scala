@@ -1,4 +1,4 @@
-package com.mickey.openssl.wrapper.actor.utils
+package com.mickey305.openssl.wrapper.actor.utils
 
 import scala.collection.mutable
 

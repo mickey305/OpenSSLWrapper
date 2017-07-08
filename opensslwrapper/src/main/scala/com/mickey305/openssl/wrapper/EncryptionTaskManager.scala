@@ -1,7 +1,7 @@
-package com.mickey.openssl.wrapper
+package com.mickey305.openssl.wrapper
 
-import com.mickey.openssl.wrapper.config.model.OpenSSL
-import com.mickey.openssl.wrapper.model.OptionKey
+import com.mickey305.openssl.wrapper.config.model.OpenSSL
+import com.mickey305.openssl.wrapper.model.OptionKey
 import com.mickey305.util.cli.commands.OpenSSLCommand
 import com.mickey305.util.cli.invokers.TermInvoker
 import com.mickey305.util.cli.model.TerminalCommandJournal

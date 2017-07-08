@@ -1,4 +1,4 @@
-package com.mickey.openssl.wrapper.exception.model
+package com.mickey305.openssl.wrapper.exception.model
 
 /**
   * Created by K.Misaki on 2017/06/20.

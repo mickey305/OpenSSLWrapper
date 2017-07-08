@@ -1,4 +1,4 @@
-package com.mickey.openssl.wrapper.config.model
+package com.mickey305.openssl.wrapper.config.model
 
 /**
   * Created by K.Misaki on 2017/06/01.

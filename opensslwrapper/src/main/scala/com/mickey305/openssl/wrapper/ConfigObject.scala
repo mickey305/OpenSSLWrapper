@@ -1,4 +1,4 @@
-package com.mickey.openssl.wrapper
+package com.mickey305.openssl.wrapper
 
 import com.typesafe.config.{Config, ConfigFactory}
 
