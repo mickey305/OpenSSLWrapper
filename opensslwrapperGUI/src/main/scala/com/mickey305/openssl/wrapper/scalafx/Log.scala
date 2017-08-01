@@ -1,4 +1,4 @@
-package com.mickey305.openssl.wrapper.scalafx.entity
+package com.mickey305.openssl.wrapper.scalafx
 
 import java.sql.Timestamp
 
