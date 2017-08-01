@@ -1,0 +1,119 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TableColumn?>
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.control.ToggleButton?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.ColumnConstraints?>
+<?import javafx.scene.layout.FlowPane?>
+<?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.layout.RowConstraints?>
+
+<?import javafx.scene.control.cell.PropertyValueFactory?>
+<FlowPane prefHeight="600.0" prefWidth="1020.0" alignment="CENTER"
+          xmlns="http://javafx.com/javafx/8.0.112"
+          xmlns:fx="http://javafx.com/fxml/1"
+          fx:controller="com.mickey305.openssl.wrapper.scalafx.controller.MainAppController">
+    <FlowPane alignment="CENTER_LEFT" prefHeight="600.0" prefWidth="1000.0">
+        <children>
+            <GridPane>
+                <columnConstraints>
+                    <ColumnConstraints halignment="LEFT" hgrow="SOMETIMES" minWidth="10.0" prefWidth="250.0"/>
+                    <ColumnConstraints halignment="LEFT" hgrow="SOMETIMES" minWidth="10.0" prefWidth="650.0"/>
+                    <ColumnConstraints halignment="CENTER" hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0"/>
+                </columnConstraints>
+                <rowConstraints>
+                    <RowConstraints minHeight="10.0" prefHeight="40.0" vgrow="SOMETIMES"/>
+                    <RowConstraints minHeight="10.0" prefHeight="40.0" vgrow="SOMETIMES"/>
+                    <RowConstraints minHeight="10.0" prefHeight="40.0" vgrow="SOMETIMES"/>
+                    <RowConstraints minHeight="10.0" prefHeight="40.0" vgrow="SOMETIMES"/>
+                    <RowConstraints minHeight="10.0" prefHeight="40.0" vgrow="SOMETIMES"/>
+                    <RowConstraints minHeight="10.0" prefHeight="40.0" vgrow="SOMETIMES"/>
+                    <RowConstraints/>
+                </rowConstraints>
+                <Label text="Execution Mode"
+                       GridPane.columnIndex="0" GridPane.rowIndex="0"/>
+                <Label fx:id="encLbl" text="null"
+                       GridPane.columnIndex="1" GridPane.rowIndex="0"/>
+                <ToggleButton fx:id="encTgl" mnemonicParsing="false" text="Check" prefHeight="30.0" prefWidth="90.0"
+                              GridPane.columnIndex="2" GridPane.rowIndex="0"/>
+                <Label text="Public Key File Path (*.pem) "
+                       GridPane.columnIndex="0" GridPane.rowIndex="1"/>
+                <TextField fx:id="pubPathTf" prefHeight="30.0" prefWidth="500.0"
+                           GridPane.columnIndex="1" GridPane.rowIndex="1"/>
+                <Button fx:id="browsePubBtn" mnemonicParsing="false" prefHeight="30.0" prefWidth="90.0" text="Browse"
+                        GridPane.columnIndex="2" GridPane.rowIndex="1"/>
+                <Label text="Private Key File Path (*.pem) "
+                       GridPane.columnIndex="0" GridPane.rowIndex="2"/>
+                <TextField fx:id="prvPathTf" prefHeight="30.0" prefWidth="500.0"
+                           GridPane.columnIndex="1" GridPane.rowIndex="2"/>
+                <Button fx:id="browsePrvBtn" mnemonicParsing="false" prefHeight="30.0" prefWidth="90.0" text="Browse"
+                        GridPane.columnIndex="2" GridPane.rowIndex="2"/>
+                <Label text="Package File Path (*.encbox) "
+                       GridPane.columnIndex="0" GridPane.rowIndex="3"/>
+                <TextField fx:id="pkgPathTf" prefHeight="30.0" prefWidth="500.0"
+                           GridPane.columnIndex="1" GridPane.rowIndex="3"/>
+                <Button fx:id="browsePkgBtn" mnemonicParsing="false" prefHeight="30.0" prefWidth="90.0" text="Browse"
+                        GridPane.columnIndex="2" GridPane.rowIndex="3"/>
+                <Label text="Input File Path"
+                       GridPane.columnIndex="0" GridPane.rowIndex="4"/>
+                <TextField fx:id="inPathTf" prefHeight="30.0" prefWidth="500.0"
+                           GridPane.columnIndex="1" GridPane.rowIndex="4"/>
+                <Button fx:id="browseInBtn" mnemonicParsing="false" prefHeight="30.0" prefWidth="90.0" text="Browse"
+                        GridPane.columnIndex="2" GridPane.rowIndex="4"/>
+                <Label text="Out Dir Path"
+                       GridPane.columnIndex="0" GridPane.rowIndex="5"/>
+                <TextField fx:id="outPathTf" prefHeight="30.0" prefWidth="500.0"
+                           GridPane.columnIndex="1" GridPane.rowIndex="5"/>
+                <Button fx:id="browseOutBtn" mnemonicParsing="false" prefHeight="30.0" prefWidth="90.0" text="Browse"
+                        GridPane.columnIndex="2" GridPane.rowIndex="5"/>
+            </GridPane>
+            <FlowPane prefHeight="210" alignment="CENTER_LEFT">
+                <TableView fx:id="table" editable="true" prefHeight="200.0" prefWidth="1000.0"
+                           AnchorPane.leftAnchor="14.0" AnchorPane.rightAnchor="14.0" AnchorPane.topAnchor="14.0">
+                    <placeholder>
+                        <Label text="this command log table is empty."/>
+                    </placeholder>
+                    <columns>
+                        <TableColumn fx:id="idCol" editable="false" maxWidth="50.0" prefWidth="50.0" text="id">
+                            <cellValueFactory>
+                                <PropertyValueFactory property="id"/>
+                            </cellValueFactory>
+                        </TableColumn>
+                        <TableColumn fx:id="pidCol" editable="false" maxWidth="70.0" prefWidth="70.0" text="pid">
+                            <cellValueFactory>
+                                <PropertyValueFactory property="pid"/>
+                            </cellValueFactory>
+                        </TableColumn>
+                        <TableColumn fx:id="cmdCol" editable="false" maxWidth="Infinity" prefWidth="400.0"
+                                     text="command">
+                            <cellValueFactory>
+                                <PropertyValueFactory property="cmd"/>
+                            </cellValueFactory>
+                        </TableColumn>
+                        <TableColumn fx:id="startCol" editable="false" maxWidth="200.0" prefWidth="200.0" text="start">
+                            <cellValueFactory>
+                                <PropertyValueFactory property="start"/>
+                            </cellValueFactory>
+                        </TableColumn>
+                        <TableColumn fx:id="endCol" editable="false" maxWidth="200.0" prefWidth="200.0" text="end">
+                            <cellValueFactory>
+                                <PropertyValueFactory property="end"/>
+                            </cellValueFactory>
+                        </TableColumn>
+                    </columns>
+                </TableView>
+            </FlowPane>
+            <FlowPane prefHeight="40" alignment="CENTER_LEFT">
+                <Button fx:id="runBtn" mnemonicParsing="false" text="Run Enc Task"/>
+            </FlowPane>
+        </children>
+        <opaqueInsets>
+            <Insets left="10.0"/>
+        </opaqueInsets>
+    </FlowPane>
+</FlowPane>
