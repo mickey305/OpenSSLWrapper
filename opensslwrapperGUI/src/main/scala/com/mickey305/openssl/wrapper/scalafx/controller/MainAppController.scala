@@ -6,7 +6,7 @@ import javafx.collections.ObservableList
 
 import com.mickey305.openssl.wrapper.EncryptionFactory
 import com.mickey305.openssl.wrapper.exception.FilePathException
-import com.mickey305.openssl.wrapper.scalafx.Log
+import com.mickey305.openssl.wrapper.scalafx.entity.Log
 import com.mickey305.util.cli.model.Benchmark
 
 import scalafx.Includes._
