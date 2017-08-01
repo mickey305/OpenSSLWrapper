@@ -8,6 +8,7 @@ object PathType {
   case object Package extends PathType
   case object PrivateKey extends PathType
   case object PublicKey extends PathType
+  case object Others extends PathType
 }
 
 sealed abstract class PathType {
