@@ -7,6 +7,7 @@ import javafx.collections.ObservableList
 import com.mickey305.openssl.wrapper.EncryptionFactory
 import com.mickey305.openssl.wrapper.exception.FilePathException
 import com.mickey305.openssl.wrapper.scalafx.entity.Log
+import com.mickey305.openssl.wrapper.scalafx.extension.{StringBuilderExtension => StrBuilderExt}
 import com.mickey305.util.cli.model.Benchmark
 
 import scalafx.Includes._
@@ -35,6 +36,9 @@ class MainAppController(val pubPathTf: TextField, val browsePubBtn: Button,
                         val endCol: TableColumn[Log, Timestamp],
                         val runBtn: Button)
   extends MainAppControllerInterface {
+
+  // extension of StringBuilder class
+  private implicit def extStrBuilder(builder: StringBuilder): StrBuilderExt = new StrBuilderExt(builder)
 
   private var stage: Stage = _
   private var isEnc = false
@@ -141,15 +145,15 @@ class MainAppController(val pubPathTf: TextField, val browsePubBtn: Button,
 
     val lines = new StringBuilder
     if (isEnc) {
-      lines.append("+ task mode: Encryption" + System.lineSeparator())
-      lines.append("+ public key file path: " + ?(pubKey) + System.lineSeparator())
-      lines.append("+ input file(encryption target): " + ?(inPath) + System.lineSeparator())
-      lines.append("+ package file path: " + ?(pkgPath) + System.lineSeparator())
+      lines.appendln("+ task mode: Encryption")
+      lines.appendln("+ public key file path: ", ?(pubKey))
+      lines.appendln("+ input file(encryption target): ", ?(inPath))
+      lines.appendln("+ package file path: ", ?(pkgPath))
     } else {
-      lines.append("+ task mode: Decryption" + System.lineSeparator())
-      lines.append("+ private key file path: " + ?(prvKey) + System.lineSeparator())
-      lines.append("+ package file path: " + ?(pkgPath) + System.lineSeparator())
-      lines.append("+ output directory path: " + ?(outPath) + System.lineSeparator())
+      lines.appendln("+ task mode: Decryption")
+      lines.appendln("+ private key file path: ", ?(prvKey))
+      lines.appendln("+ package file path: ", ?(pkgPath))
+      lines.appendln("+ output directory path: ", ?(outPath))
     }
 
     val confAlert = new Alert(AlertType.Confirmation, lines.toString(), ButtonType.Cancel, ButtonType.OK)
@@ -170,7 +174,7 @@ class MainAppController(val pubPathTf: TextField, val browsePubBtn: Button,
       // create log list
       if (status) {
         val items: ObservableList[Log] = table.getItems
-        val idOffset = if (items.isEmpty) 0 else items.last.getId() + 1
+        val idOffset = if (items.isEmpty) 0 else items.size()
         ef.cliTskMngr.journal().foreach(journal => {
           items.add(
             new Log(journal.getId + idOffset, journal.getPid, journal.getExecutionSentence,
