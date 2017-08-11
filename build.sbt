@@ -66,7 +66,15 @@ lazy val opensslwrapperGUI = (project in file("opensslwrapperGUI")).
       // https://mvnrepository.com/artifact/commons-io/commons-io
       "commons-io"                % "commons-io"                 % "2.5",
       // https://mvnrepository.com/artifact/org.apache.commons/commons-lang3
-      "org.apache.commons"        % "commons-lang3"              % "3.5"
+      "org.apache.commons"        % "commons-lang3"              % "3.5",
+      // https://mvnrepository.com/artifact/org.apache.poi/poi
+      "org.apache.poi"            % "poi"                        % "3.16",
+      // https://mvnrepository.com/artifact/org.apache.poi/poi-ooxml-schemas
+      "org.apache.poi"            % "poi-ooxml-schemas"          % "3.16",
+      // https://mvnrepository.com/artifact/org.apache.poi/poi-ooxml
+      "org.apache.poi"            % "poi-ooxml"                  % "3.16",
+      // https://mvnrepository.com/artifact/org.apache.xmlbeans/xmlbeans
+      "org.apache.xmlbeans"       % "xmlbeans"                   % "2.6.0"
     ),
     addCompilerPlugin(
       "org.scalamacros"           % "paradise"                   % "2.1.0" cross CrossVersion.full

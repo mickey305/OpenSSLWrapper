@@ -14,6 +14,11 @@
 <?import javafx.scene.layout.RowConstraints?>
 
 <?import javafx.scene.control.cell.PropertyValueFactory?>
+<?import javafx.scene.shape.SVGPath?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.image.Image?>
+<?import javafx.scene.layout.Pane?>
+<?import javafx.scene.control.Hyperlink?>
 <FlowPane prefHeight="600.0" prefWidth="1020.0" alignment="CENTER"
           xmlns="http://javafx.com/javafx/8.0.112"
           xmlns:fx="http://javafx.com/fxml/1"
@@ -108,8 +113,21 @@
                     </columns>
                 </TableView>
             </FlowPane>
-            <FlowPane prefHeight="40" alignment="CENTER_LEFT">
-                <Button fx:id="runBtn" mnemonicParsing="false" text="Run Enc Task"/>
+            <FlowPane prefHeight="40" alignment="CENTER_LEFT" prefWidth="110" >
+                <Button fx:id="runBtn" mnemonicParsing="false" text="Run Enc Task" prefHeight="20"/>
+            </FlowPane>
+            <FlowPane prefHeight="40" alignment="CENTER_LEFT" prefWidth="200">
+                <Button fx:id="logExportBtn" mnemonicParsing="false" prefHeight="20" onMouseClicked="#handleExportExcel">
+                    <graphic>
+                        <ImageView fitHeight="17" fitWidth="17">
+                            <image>
+                                <Image url="@icons/excel.png"/>
+                            </image>
+                        </ImageView>
+                    </graphic>
+                </Button>
+                <Pane prefWidth="10"/>
+                <Hyperlink fx:id="tmpDirLink" text="Temporary Folder"/>
             </FlowPane>
         </children>
         <opaqueInsets>

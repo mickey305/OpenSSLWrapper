@@ -1,5 +1,6 @@
 package com.mickey305.openssl.wrapper.scalafx.controller
 
+import java.awt.Desktop
 import java.io.File
 import java.sql.Timestamp
 import javafx.collections.ObservableList
@@ -19,6 +20,7 @@ import scalafxml.core.macros.sfxml
 
 trait MainAppControllerInterface {
   def setStage(stage: Stage): Unit
+  def setTmpPath(path: String): Unit
 }
 
 @sfxml
@@ -34,12 +36,15 @@ class MainAppController(val pubPathTf: TextField, val browsePubBtn: Button,
                         val cmdCol: TableColumn[Log, String],
                         val startCol: TableColumn[Log, Timestamp],
                         val endCol: TableColumn[Log, Timestamp],
+                        val logExportBtn: Button,
+                        val tmpDirLink: Hyperlink,
                         val runBtn: Button)
   extends MainAppControllerInterface {
 
   // extension of StringBuilder class
   private implicit def extStrBuilder(builder: StringBuilder): StrBuilderExt = new StrBuilderExt(builder)
 
+  private var tmpDirPath: String = _
   private var stage: Stage = _
   private var isEnc = false
   toggleContents(isEnc)
@@ -116,6 +121,11 @@ class MainAppController(val pubPathTf: TextField, val browsePubBtn: Button,
   encTgl.onMouseClicked = (e: MouseEvent) => {
     isEnc = !isEnc
     toggleContents(isEnc)
+  }
+
+  //===--- TmpDir Hyperlink Event -------- ------------------------------------------------------------------------===//
+  tmpDirLink.onMouseClicked = (e: MouseEvent) => {
+    Desktop.getDesktop.open(new File(tmpDirPath))
   }
 
   //===--- Run Button Event ---------------------------------------------------------------------------------------===//
@@ -205,6 +215,18 @@ class MainAppController(val pubPathTf: TextField, val browsePubBtn: Button,
   }
 
   //===------------------------------------------------------------------------------------------------------------===//
+  def handleExportExcel: Unit = {
+    val targetExcelFilePath = tmpDirPath + this.getClass.getName + "tmp.xlsx"
+    val excelExporter = new ExcelExporter[Log](targetExcelFilePath)
+    excelExporter.execute(table.getItems, log => Seq(
+      log.getId().toString,
+      log.getPid().toString,
+      log.getCmd().toString,
+      log.getStart().toString,
+      log.getEnd().toString))
+    Desktop.getDesktop.open(new File(targetExcelFilePath))
+  }
+
   private def filterString(target: String): String = if (target == null || target.isEmpty) "[NULL]" else target
 
   // Todo: escape method logic creation
@@ -257,4 +279,21 @@ class MainAppController(val pubPathTf: TextField, val browsePubBtn: Button,
   }
 
   override def setStage(stage: Stage): Unit = this.stage = stage
+
+  override def setTmpPath(path: String): Unit = this.tmpDirPath = path
+}
+
+import com.mickey305.openssl.wrapper.scalafx.plugin.{ExcelExporter => Exporter}
+
+class ExcelExporter[T](path: String) extends Exporter[T](path) {
+  import scala.collection.JavaConverters._
+  import java.util.{function => jfunc}
+  /**
+    * export excel file
+    */
+  def execute(lines: ObservableList[T], callback: T => Seq[String]): Unit = {
+    val path = super.getPath
+    val func: jfunc.Function[T, Array[String]] = log => callback.apply(log).toArray
+    if (path.endsWith(".xlsx")) super.execute(lines.toList.asJava, func)
+  }
 }
