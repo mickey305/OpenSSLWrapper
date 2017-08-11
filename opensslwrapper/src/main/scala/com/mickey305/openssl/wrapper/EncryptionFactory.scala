@@ -89,7 +89,7 @@ class EncryptionFactory {
     * @throws com.mickey305.openssl.wrapper.exception.FilePathException validation Check
     */
   @throws(classOf[FilePathException])
-  def unpack(outDirPath: String, callbackVersionDiff: Option[Unit => Boolean] = None): Unit ={
+  def unpack(outDirPath: String, callbackVersionDiff: Option[(String/*encrypted OpenSSL version*/, String/*decryption OpenSSL version*/) => Boolean] = None): Unit ={
     if (packageFilePath == null || packageFilePath.isEmpty)
       throw new FilePathException("error occurred.(package validation check)", Package)
     if (opensslCfg.privateKey == null)
@@ -114,10 +114,11 @@ class EncryptionFactory {
         contentsCfg.path = tmpDirPath
         contentsCfg.load
         // execution
-        val version = opensslCfg.version
-        if (version == null || !version.equals(cliTskMngr.opensslVersion()))
+        val infoVersion = opensslCfg.version
+        val thisVersion = cliTskMngr.opensslVersion()
+        if (infoVersion == null || !infoVersion.equals(thisVersion))
           callbackVersionDiff match {
-            case Some(status) => if(!status()) return }
+            case Some(status) => if(!status(infoVersion, thisVersion)) return }
         val shareKeyPath = tmpDirPath + opensslCfg.shareKey
         val encShareKeyPath = shareKeyPath + encryptionFileExt
         cliTskMngr.subscribePKeyDecryption(opensslCfg, privateKeyPath, encShareKeyPath, shareKeyPath)

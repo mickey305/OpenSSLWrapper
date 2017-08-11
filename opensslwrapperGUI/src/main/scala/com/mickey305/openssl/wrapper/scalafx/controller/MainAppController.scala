@@ -126,12 +126,17 @@ class MainAppController(val pubPathTf: TextField, val browsePubBtn: Button,
     val pkgPath = pkgPathTf.getText
     val inPath = inPathTf.getText
     val outPath = outPathTf.getText
-    val opt: Option[Unit => Boolean] = Option(_ => {
+    val opt: Option[(String, String) => Boolean] = Option((encV, decV) => {
+      val lines = new StringBuilder
+      lines.appendln("Encryption OpenSSL Version [", encV, "]")
+      lines.appends("This PC's OpenSSL Version [", decV, "]")
+      val textArea = new TextArea(lines.toString)
       val alert = new Alert(
         AlertType.Warning,
         "This PC OpenSSL Version is different from encrypted OpenSSL version",
-        ButtonType.Cancel, ButtonType.Cancel)
+        ButtonType.Cancel, ButtonType.OK)
       alert.setTitle("Version Warning Information!")
+      alert.getDialogPane.setExpandableContent(textArea)
       alert.showAndWait() match {
         case Some(value) => value == ButtonType.OK
         case None => false
@@ -174,10 +179,13 @@ class MainAppController(val pubPathTf: TextField, val browsePubBtn: Button,
       // create log list
       if (status) {
         val items: ObservableList[Log] = table.getItems
-        val idOffset = if (items.isEmpty) 0 else items.size()
+        val idOffset = if (!items.isEmpty) items.maxBy(_.getId()).getId() + 1 else 0
         ef.cliTskMngr.journal().foreach(journal => {
           items.add(
-            new Log(journal.getId + idOffset, journal.getPid, journal.getExecutionSentence,
+            new Log(
+              journal.getId + idOffset,
+              journal.getPid,
+              journal.getExecutionSentence,
               journal.getTimestampMaps.get(Benchmark.START),
               journal.getTimestampMaps.get(Benchmark.END)))
         })
