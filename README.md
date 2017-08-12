@@ -64,3 +64,4 @@ dependencies {
 -->
 # History
  * version 0.0.1-beta deploy - 2017/08/12
+   - <a href="https://drive.google.com/open?id=0B_D7K22VOlzMbDdOcmpPOE5SM1k">Download</a>
