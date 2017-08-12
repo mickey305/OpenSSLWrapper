@@ -247,9 +247,9 @@ class MainAppController(val pubPathTf: TextField, val browsePubBtn: Button,
   def handleLogClear: Unit = table.getItems.clear()
 
   def handleDefaultSettingLoad: Unit = {
-    settingLoadBtn.disable = true
-    settingStoreBtn.disable = true
     if (!config.getPublicKeyPath.isEmpty) {
+      settingLoadBtn.disable = true
+      settingStoreBtn.disable = true
       setTextTo(pubPathTf, new File(config.getPublicKeyPath))
       pubPathTf.style = "-fx-text-inner-color: green;"
       val th = new Thread {
@@ -266,6 +266,8 @@ class MainAppController(val pubPathTf: TextField, val browsePubBtn: Button,
       th.start()
     }
     if (!config.getPrivateKeyPath.isEmpty) {
+      settingLoadBtn.disable = true
+      settingStoreBtn.disable = true
       setTextTo(prvPathTf, new File(config.getPrivateKeyPath))
       prvPathTf.style = "-fx-text-inner-color: green;"
       val th = new Thread {
