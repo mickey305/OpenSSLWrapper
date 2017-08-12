@@ -1,6 +1,13 @@
+
+lazy val compilecheck = taskKey[Unit]("compile and then scalastyle")
+
 lazy val commonSettings = Seq(
-  version := "0.0.1",
-  scalaVersion := "2.12.2"
+  version := "0.0.1-beta",
+  scalaVersion := "2.12.2",
+  compilecheck in Compile := Def.sequential(
+    compile in Compile,
+    (scalastyle in Compile).toTask("")
+  ).value
 )
 
 lazy val root = (project in file(".")).

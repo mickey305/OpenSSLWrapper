@@ -1,0 +1,11 @@
+language: scala
+scala:
+  - 2.12.2
+jdk:
+  - oraclejdk8
+script:
+  - sbt compilecheck
+branches:
+  only:
+    - master
+    - develop
