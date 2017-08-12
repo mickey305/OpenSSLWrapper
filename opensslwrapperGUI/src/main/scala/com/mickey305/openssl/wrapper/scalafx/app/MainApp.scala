@@ -1,6 +1,5 @@
 package com.mickey305.openssl.wrapper.scalafx.app
 
-import java.awt.Desktop
 import java.io.{File, IOException}
 import java.net.URL
 import java.nio.file.{Files, Paths}

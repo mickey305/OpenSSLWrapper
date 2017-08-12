@@ -216,7 +216,7 @@ class MainAppController(val pubPathTf: TextField, val browsePubBtn: Button,
 
   //===------------------------------------------------------------------------------------------------------------===//
   def handleExportExcel: Unit = {
-    val targetExcelFilePath = tmpDirPath + this.getClass.getName + "tmp.xlsx"
+    val targetExcelFilePath = tmpDirPath + this.getClass.getName + "_LogList.xlsx"
     val excelExporter = new ExcelExporter[Log](targetExcelFilePath)
     excelExporter.execute(table.getItems, log => Seq(
       log.getId().toString,
