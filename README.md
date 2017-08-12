@@ -8,6 +8,8 @@
 | release | master | [![Build Status](https://travis-ci.org/mickey305/OpenSSLWrapper.svg?branch=master)](https://travis-ci.org/mickey305/OpenSSLWrapper) | [![](https://jitpack.io/v/mickey305/OpenSSLWrapper.svg)](https://jitpack.io/#mickey305/OpenSSLWrapper) |
 | - | develop | [![Build Status](https://travis-ci.org/mickey305/OpenSSLWrapper.svg?branch=develop)](https://travis-ci.org/mickey305/OpenSSLWrapper) |  |
 
+ * <a href="https://drive.google.com/drive/folders/0B7IUrP_2b1kzSmR3WlhUZDJHMWs?usp=sharing">Download from Google Drive</a>
+
 <!--
 # Installation(Pattern 1)
 ## 1 - Register repository in local library
@@ -64,4 +66,3 @@ dependencies {
 -->
 # History
  * version 0.0.1-beta deploy - 2017/08/12
-   - <a href="https://drive.google.com/open?id=0B_D7K22VOlzMbDdOcmpPOE5SM1k">Download</a>
