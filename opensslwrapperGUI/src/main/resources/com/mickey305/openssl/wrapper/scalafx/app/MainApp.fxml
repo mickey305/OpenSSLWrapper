@@ -14,7 +14,6 @@
 <?import javafx.scene.layout.RowConstraints?>
 
 <?import javafx.scene.control.cell.PropertyValueFactory?>
-<?import javafx.scene.shape.SVGPath?>
 <?import javafx.scene.image.ImageView?>
 <?import javafx.scene.image.Image?>
 <?import javafx.scene.layout.Pane?>
@@ -25,7 +24,34 @@
           fx:controller="com.mickey305.openssl.wrapper.scalafx.controller.MainAppController">
     <FlowPane alignment="CENTER_LEFT" prefHeight="600.0" prefWidth="1000.0">
         <children>
-            <GridPane>
+            <FlowPane prefHeight="40" alignment="CENTER_LEFT">
+                <!--<Pane prefWidth="10"/>-->
+                <Label text="Default Settings"/>
+                <Pane prefWidth="10"/>
+                <Button fx:id="settingLoadBtn" mnemonicParsing="false" prefHeight="20" onMouseClicked="#handleDefaultSettingLoad">
+                    <graphic>
+                        <ImageView fitHeight="10" fitWidth="10">
+                            <image>
+                                <Image url="@icons/reload.png"/>
+                            </image>
+                        </ImageView>
+                    </graphic>
+                </Button>
+                <Pane prefWidth="10"/>
+                <Button fx:id="settingStoreBtn" mnemonicParsing="false" prefHeight="20" onMouseClicked="#handleDefaultSettingStore">
+                    <graphic>
+                        <ImageView fitHeight="10" fitWidth="10">
+                            <image>
+                                <Image url="@icons/store.png"/>
+                            </image>
+                        </ImageView>
+                    </graphic>
+                </Button>
+                <Pane prefWidth="10"/>
+                <Hyperlink fx:id="configFileLink" text="Open File"/>
+                <Pane prefWidth="10"/>
+            </FlowPane>
+            <GridPane style="-fx-border-width: 1; -fx-border-style: solid; -fx-border-color: #bbbbbb;">
                 <columnConstraints>
                     <ColumnConstraints halignment="LEFT" hgrow="SOMETIMES" minWidth="10.0" prefWidth="250.0"/>
                     <ColumnConstraints halignment="LEFT" hgrow="SOMETIMES" minWidth="10.0" prefWidth="650.0"/>
@@ -40,37 +66,37 @@
                     <RowConstraints minHeight="10.0" prefHeight="40.0" vgrow="SOMETIMES"/>
                     <RowConstraints/>
                 </rowConstraints>
-                <Label text="Execution Mode"
+                <Label text=" Execution Mode"
                        GridPane.columnIndex="0" GridPane.rowIndex="0"/>
                 <Label fx:id="encLbl" text="null"
                        GridPane.columnIndex="1" GridPane.rowIndex="0"/>
                 <ToggleButton fx:id="encTgl" mnemonicParsing="false" text="Check" prefHeight="30.0" prefWidth="90.0"
                               GridPane.columnIndex="2" GridPane.rowIndex="0"/>
-                <Label text="Public Key File Path (*.pem) "
+                <Label text=" Public Key File Path (*.pem) "
                        GridPane.columnIndex="0" GridPane.rowIndex="1"/>
                 <TextField fx:id="pubPathTf" prefHeight="30.0" prefWidth="500.0"
                            GridPane.columnIndex="1" GridPane.rowIndex="1"/>
                 <Button fx:id="browsePubBtn" mnemonicParsing="false" prefHeight="30.0" prefWidth="90.0" text="Browse"
                         GridPane.columnIndex="2" GridPane.rowIndex="1"/>
-                <Label text="Private Key File Path (*.pem) "
+                <Label text=" Private Key File Path (*.pem) "
                        GridPane.columnIndex="0" GridPane.rowIndex="2"/>
                 <TextField fx:id="prvPathTf" prefHeight="30.0" prefWidth="500.0"
                            GridPane.columnIndex="1" GridPane.rowIndex="2"/>
                 <Button fx:id="browsePrvBtn" mnemonicParsing="false" prefHeight="30.0" prefWidth="90.0" text="Browse"
                         GridPane.columnIndex="2" GridPane.rowIndex="2"/>
-                <Label text="Package File Path (*.encbox) "
+                <Label text=" Package File Path (*.encbox) "
                        GridPane.columnIndex="0" GridPane.rowIndex="3"/>
                 <TextField fx:id="pkgPathTf" prefHeight="30.0" prefWidth="500.0"
                            GridPane.columnIndex="1" GridPane.rowIndex="3"/>
                 <Button fx:id="browsePkgBtn" mnemonicParsing="false" prefHeight="30.0" prefWidth="90.0" text="Browse"
                         GridPane.columnIndex="2" GridPane.rowIndex="3"/>
-                <Label text="Input File Path"
+                <Label text=" Input File Path"
                        GridPane.columnIndex="0" GridPane.rowIndex="4"/>
                 <TextField fx:id="inPathTf" prefHeight="30.0" prefWidth="500.0"
                            GridPane.columnIndex="1" GridPane.rowIndex="4"/>
                 <Button fx:id="browseInBtn" mnemonicParsing="false" prefHeight="30.0" prefWidth="90.0" text="Browse"
                         GridPane.columnIndex="2" GridPane.rowIndex="4"/>
-                <Label text="Out Dir Path"
+                <Label text=" Out Dir Path"
                        GridPane.columnIndex="0" GridPane.rowIndex="5"/>
                 <TextField fx:id="outPathTf" prefHeight="30.0" prefWidth="500.0"
                            GridPane.columnIndex="1" GridPane.rowIndex="5"/>
@@ -116,7 +142,18 @@
             <FlowPane prefHeight="40" alignment="CENTER_LEFT" prefWidth="110" >
                 <Button fx:id="runBtn" mnemonicParsing="false" text="Run Enc Task" prefHeight="20"/>
             </FlowPane>
-            <FlowPane prefHeight="40" alignment="CENTER_LEFT" prefWidth="200">
+            <FlowPane prefHeight="40" alignment="CENTER_LEFT" style="-fx-border-width: 1; -fx-border-style: solid; -fx-border-color: #bbbbbb;">
+                <Pane prefWidth="10"/>
+                <Button fx:id="logClearBtn" mnemonicParsing="false" prefHeight="20" onMouseClicked="#handleLogClear">
+                    <graphic>
+                        <ImageView fitHeight="17" fitWidth="17">
+                            <image>
+                                <Image url="@icons/trash.png"/>
+                            </image>
+                        </ImageView>
+                    </graphic>
+                </Button>
+                <Pane prefWidth="10"/>
                 <Button fx:id="logExportBtn" mnemonicParsing="false" prefHeight="20" onMouseClicked="#handleExportExcel">
                     <graphic>
                         <ImageView fitHeight="17" fitWidth="17">
@@ -128,6 +165,7 @@
                 </Button>
                 <Pane prefWidth="10"/>
                 <Hyperlink fx:id="tmpDirLink" text="Temporary Folder"/>
+                <Pane prefWidth="10"/>
             </FlowPane>
         </children>
         <opaqueInsets>

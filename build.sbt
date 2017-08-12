@@ -7,7 +7,8 @@ lazy val root = (project in file(".")).
   settings(commonSettings: _*).
   settings(
     name := "OpenSSLWrapper Project",
-    scalacOptions += "-deprecation"
+    scalacOptions += "-deprecation",
+    test in assembly := {}
   ).aggregate(sample, opensslwrapper, opensslwrapperGUI)
 
 lazy val sample = (project in file("sample")).
@@ -16,6 +17,7 @@ lazy val sample = (project in file("sample")).
   settings(
     name := "Sample",
     scalacOptions += "-deprecation",
+    test in assembly := {},
     resolvers ++= Seq(
       "jitpack" at "https://jitpack.io"
     ),
@@ -30,6 +32,7 @@ lazy val opensslwrapper = (project in file("opensslwrapper")).
   settings(
     name := "OpenSSLWrapper",
     scalacOptions += "-deprecation",
+    test in assembly := {},
     resolvers ++= Seq(
       "Typesafe Repository" at "http://repo.typesafe.com/typesafe/releases/",
       "jitpack" at "https://jitpack.io"
@@ -51,6 +54,8 @@ lazy val opensslwrapperGUI = (project in file("opensslwrapperGUI")).
   settings(
     name := "OpenSSLWrapperGUI",
     scalacOptions += "-deprecation",
+//    assemblyJarName in assembly := "opensslwrapperGUI.jar",
+    mainClass in assembly := Some("com.mickey305.openssl.wrapper.scalafx.app.MainApp"),
     resolvers ++= Seq(
       "Typesafe Repository" at "http://repo.typesafe.com/typesafe/releases/",
       "jitpack" at "https://jitpack.io",
@@ -74,7 +79,9 @@ lazy val opensslwrapperGUI = (project in file("opensslwrapperGUI")).
       // https://mvnrepository.com/artifact/org.apache.poi/poi-ooxml
       "org.apache.poi"            % "poi-ooxml"                  % "3.16",
       // https://mvnrepository.com/artifact/org.apache.xmlbeans/xmlbeans
-      "org.apache.xmlbeans"       % "xmlbeans"                   % "2.6.0"
+      "org.apache.xmlbeans"       % "xmlbeans"                   % "2.6.0",
+      // https://mvnrepository.com/artifact/com.google.code.gson/gson
+      "com.google.code.gson"      % "gson"                       % "2.8.1"
     ),
     addCompilerPlugin(
       "org.scalamacros"           % "paradise"                   % "2.1.0" cross CrossVersion.full

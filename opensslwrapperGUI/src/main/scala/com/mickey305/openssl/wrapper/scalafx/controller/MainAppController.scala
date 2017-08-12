@@ -5,13 +5,16 @@ import java.io.File
 import java.sql.Timestamp
 import javafx.collections.ObservableList
 
+import com.google.gson.Gson
 import com.mickey305.openssl.wrapper.EncryptionFactory
 import com.mickey305.openssl.wrapper.exception.FilePathException
-import com.mickey305.openssl.wrapper.scalafx.entity.Log
+import com.mickey305.openssl.wrapper.scalafx.app.ConfigManager
+import com.mickey305.openssl.wrapper.scalafx.entity.{Config, Log}
 import com.mickey305.openssl.wrapper.scalafx.extension.{StringBuilderExtension => StrBuilderExt}
 import com.mickey305.util.cli.model.Benchmark
 
 import scalafx.Includes._
+import scalafx.application.Platform
 import scalafx.scene.control.Alert.AlertType
 import scalafx.scene.control._
 import scalafx.scene.input.MouseEvent
@@ -21,6 +24,8 @@ import scalafxml.core.macros.sfxml
 trait MainAppControllerInterface {
   def setStage(stage: Stage): Unit
   def setTmpPath(path: String): Unit
+  def setConfig(config: Config): Unit
+  def setCacheDirectoryPath(cacheDir: String): Unit
 }
 
 @sfxml
@@ -38,14 +43,20 @@ class MainAppController(val pubPathTf: TextField, val browsePubBtn: Button,
                         val endCol: TableColumn[Log, Timestamp],
                         val logExportBtn: Button,
                         val tmpDirLink: Hyperlink,
+                        val configFileLink: Hyperlink,
+                        val settingLoadBtn: Button,
+                        val settingStoreBtn: Button,
                         val runBtn: Button)
   extends MainAppControllerInterface {
 
   // extension of StringBuilder class
   private implicit def extStrBuilder(builder: StringBuilder): StrBuilderExt = new StrBuilderExt(builder)
 
+  private var config: Config = _
+  private var cacheDir: String = _
   private var tmpDirPath: String = _
   private var stage: Stage = _
+
   private var isEnc = false
   toggleContents(isEnc)
 
@@ -123,9 +134,15 @@ class MainAppController(val pubPathTf: TextField, val browsePubBtn: Button,
     toggleContents(isEnc)
   }
 
-  //===--- TmpDir Hyperlink Event -------- ------------------------------------------------------------------------===//
+  //===--- TmpDir Hyperlink Event ---------------------------------------------------------------------------------===//
   tmpDirLink.onMouseClicked = (e: MouseEvent) => {
     Desktop.getDesktop.open(new File(tmpDirPath))
+  }
+
+  //===--- ConfigFile Hyperlink Event -----------------------------------------------------------------------------===//
+  configFileLink.onMouseClicked = (e: MouseEvent) => {
+    val mngr = new ConfigManager(new Gson(), cacheDir)
+    mngr.open()
   }
 
   //===--- Run Button Event ---------------------------------------------------------------------------------------===//
@@ -227,6 +244,52 @@ class MainAppController(val pubPathTf: TextField, val browsePubBtn: Button,
     Desktop.getDesktop.open(new File(targetExcelFilePath))
   }
 
+  def handleLogClear: Unit = table.getItems.clear()
+
+  def handleDefaultSettingLoad: Unit = {
+    settingLoadBtn.disable = true
+    settingStoreBtn.disable = true
+    if (!config.getPublicKeyPath.isEmpty) {
+      setTextTo(pubPathTf, new File(config.getPublicKeyPath))
+      pubPathTf.style = "-fx-text-inner-color: green;"
+      val th = new Thread {
+        setDaemon(true)
+        override def run = {
+          Thread.sleep(500)
+          Platform.runLater {
+            pubPathTf.style = "-fx-text-inner-color: black;"
+            settingLoadBtn.disable = false
+            settingStoreBtn.disable = false
+          }
+        }
+      }
+      th.start()
+    }
+    if (!config.getPrivateKeyPath.isEmpty) {
+      setTextTo(prvPathTf, new File(config.getPrivateKeyPath))
+      prvPathTf.style = "-fx-text-inner-color: green;"
+      val th = new Thread {
+        setDaemon(true)
+        override def run = {
+          Thread.sleep(500)
+          Platform.runLater {
+            prvPathTf.style = "-fx-text-inner-color: black;"
+            settingLoadBtn.disable = false
+            settingStoreBtn.disable = false
+          }
+        }
+      }
+      th.start()
+    }
+  }
+
+  def handleDefaultSettingStore: Unit = {
+    config.setPublicKeyPath(pubPathTf.getText)
+    config.setPrivateKeyPath(prvPathTf.getText)
+    val mngr = new ConfigManager(new Gson(), cacheDir)
+    mngr.save(config)
+  }
+
   private def filterString(target: String): String = if (target == null || target.isEmpty) "[NULL]" else target
 
   // Todo: escape method logic creation
@@ -281,6 +344,10 @@ class MainAppController(val pubPathTf: TextField, val browsePubBtn: Button,
   override def setStage(stage: Stage): Unit = this.stage = stage
 
   override def setTmpPath(path: String): Unit = this.tmpDirPath = path
+
+  override def setConfig(config: Config): Unit = this.config = config
+
+  override def setCacheDirectoryPath(cacheDir: String): Unit = this.cacheDir = cacheDir
 }
 
 import com.mickey305.openssl.wrapper.scalafx.plugin.{ExcelExporter => Exporter}
