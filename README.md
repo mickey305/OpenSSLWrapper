@@ -66,3 +66,5 @@ dependencies {
 -->
 # History
  * version 0.0.1-beta deploy - 2017/08/12
+ * version 0.0.2-beta deploy - 2017/08/14
+   - UI small fix / default setting initial load etc.
