@@ -6,7 +6,7 @@
 <?import javafx.scene.control.TableColumn?>
 <?import javafx.scene.control.TableView?>
 <?import javafx.scene.control.TextField?>
-<?import javafx.scene.control.ToggleButton?>
+<?import javafx.scene.control.CheckBox?>
 <?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.layout.ColumnConstraints?>
 <?import javafx.scene.layout.FlowPane?>
@@ -69,10 +69,10 @@
                 </rowConstraints>
                 <Label text=" Execution Mode"
                        GridPane.columnIndex="0" GridPane.rowIndex="0"/>
-                <Label fx:id="encLbl" text="null"
-                       GridPane.columnIndex="1" GridPane.rowIndex="0"/>
-                <ToggleButton fx:id="encTgl" mnemonicParsing="false" text="Check" prefHeight="30.0" prefWidth="90.0"
-                              GridPane.columnIndex="2" GridPane.rowIndex="0"/>
+                <FlowPane GridPane.columnIndex="1" GridPane.rowIndex="0">
+                    <CheckBox fx:id="encTgl" mnemonicParsing="false" text="" prefHeight="30.0"/>
+                    <Label fx:id="encLbl" text="null"/>
+                </FlowPane>
                 <Label text=" Public Key File Path (*.pem) "
                        GridPane.columnIndex="0" GridPane.rowIndex="1"/>
                 <TextField fx:id="pubPathTf" prefHeight="30.0" prefWidth="500.0"

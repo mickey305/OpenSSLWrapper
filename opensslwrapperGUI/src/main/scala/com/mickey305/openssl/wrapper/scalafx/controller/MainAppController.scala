@@ -49,6 +49,7 @@ trait MainAppControllerInterface {
   def setTmpPath(path: String): Unit
   def setConfig(config: Config): Unit
   def setCacheDirectoryPath(cacheDir: String): Unit
+  def loadDefaultSetting: Unit
 }
 
 @sfxml
@@ -57,7 +58,7 @@ class MainAppController(val pubPathTf: TextField, val browsePubBtn: Button,
                         val pkgPathTf: TextField, val browsePkgBtn: Button,
                         val inPathTf: TextField, val browseInBtn: Button,
                         val outPathTf: TextField, val browseOutBtn: Button,
-                        val encLbl: Label, val encTgl: ToggleButton,
+                        val encLbl: Label, val encTgl: CheckBox,
                         val table: TableView[Log],
                         val idCol: TableColumn[Log, Long],
                         val pidCol: TableColumn[Log, Int],
@@ -80,8 +81,7 @@ class MainAppController(val pubPathTf: TextField, val browsePubBtn: Button,
   private var tmpDirPath: String = _
   private var stage: Stage = _
 
-  private var isEnc = false
-  toggleContents(isEnc)
+  toggleContents(encTgl.selected.value)
 
   //===--- PublicKey Browse Button Event --------------------------------------------------------------------------===//
   browsePubBtn.onMouseClicked = (e: MouseEvent) => {
@@ -108,7 +108,7 @@ class MainAppController(val pubPathTf: TextField, val browsePubBtn: Button,
   //===--- PackageFile Browse Button Event ------------------------------------------------------------------------===//
   browsePkgBtn.onMouseClicked = (e: MouseEvent) => {
     var file: File = null
-    if (!isEnc) {
+    if (!encTgl.selected.value) {
       val fileChooser = new FileChooser()
       fileChooser.extensionFilters.addAll(
         new FileChooser.ExtensionFilter("Encbox File", Seq("*.encbox"))
@@ -153,8 +153,7 @@ class MainAppController(val pubPathTf: TextField, val browsePubBtn: Button,
 
   //===--- Encryption Button Event --------------------------------------------------------------------------------===//
   encTgl.onMouseClicked = (e: MouseEvent) => {
-    isEnc = !isEnc
-    toggleContents(isEnc)
+    toggleContents(encTgl.selected.value)
   }
 
   //===--- TmpDir Hyperlink Event ---------------------------------------------------------------------------------===//
@@ -199,7 +198,7 @@ class MainAppController(val pubPathTf: TextField, val browsePubBtn: Button,
     ef.packageFilePath = pkgPath
 
     val lines = new StringBuilder
-    if (isEnc) {
+    if (encTgl.selected.value) {
       lines.appendln("+ task mode: Encryption")
       lines.appendln("+ public key file path: ", ?(pubKey))
       lines.appendln("+ input file(encryption target): ", ?(inPath))
@@ -220,10 +219,10 @@ class MainAppController(val pubPathTf: TextField, val browsePubBtn: Button,
 
     try {
       // post task to background libraries
-      if (isEnc && status) {
+      if (encTgl.selected.value && status) {
         ef.pack(inPath)
       }
-      if (!isEnc && status) {
+      if (!encTgl.selected.value && status) {
         ef.unpack(outPath, opt)
       }
       // create log list
@@ -270,47 +269,35 @@ class MainAppController(val pubPathTf: TextField, val browsePubBtn: Button,
   def handleLogClear: Unit = table.getItems.clear()
 
   def handleDefaultSettingLoad: Unit = {
-    if (!config.getPublicKeyPath.isEmpty) {
-      settingLoadBtn.disable = true
-      settingStoreBtn.disable = true
-      setTextTo(pubPathTf, new File(config.getPublicKeyPath))
-      pubPathTf.style = "-fx-text-inner-color: green;"
-      val th = new Thread {
-        setDaemon(true)
-        override def run = {
-          Thread.sleep(500)
-          Platform.runLater {
-            pubPathTf.style = "-fx-text-inner-color: black;"
-            settingLoadBtn.disable = false
-            settingStoreBtn.disable = false
-          }
+    settingLoadBtn.disable = true
+    settingStoreBtn.disable = true
+    if (!config.getPublicKeyPath.isEmpty) setTextTo(pubPathTf, new File(config.getPublicKeyPath))
+    if (!config.getPublicKeyPath.isEmpty) pubPathTf.style = "-fx-text-inner-color: green;"
+    if (!config.getPrivateKeyPath.isEmpty) setTextTo(prvPathTf, new File(config.getPrivateKeyPath))
+    if (!config.getPrivateKeyPath.isEmpty) prvPathTf.style = "-fx-text-inner-color: green;"
+    encTgl.selected = config.isExecutionEncryptionMode
+    toggleContents(encTgl.selected.value)
+    encLbl.style = "-fx-text-fill: green;"
+    val th = new Thread {
+      setDaemon(true)
+      override def run = {
+        Thread.sleep(500)
+        Platform.runLater {
+          if (!config.getPublicKeyPath.isEmpty) pubPathTf.style = "-fx-text-inner-color: black;"
+          if (!config.getPrivateKeyPath.isEmpty) prvPathTf.style = "-fx-text-inner-color: black;"
+          encLbl.style = "-fx-text-fill: black;"
+          settingLoadBtn.disable = false
+          settingStoreBtn.disable = false
         }
       }
-      th.start()
     }
-    if (!config.getPrivateKeyPath.isEmpty) {
-      settingLoadBtn.disable = true
-      settingStoreBtn.disable = true
-      setTextTo(prvPathTf, new File(config.getPrivateKeyPath))
-      prvPathTf.style = "-fx-text-inner-color: green;"
-      val th = new Thread {
-        setDaemon(true)
-        override def run = {
-          Thread.sleep(500)
-          Platform.runLater {
-            prvPathTf.style = "-fx-text-inner-color: black;"
-            settingLoadBtn.disable = false
-            settingStoreBtn.disable = false
-          }
-        }
-      }
-      th.start()
-    }
+    th.start()
   }
 
   def handleDefaultSettingStore: Unit = {
     config.setPublicKeyPath(pubPathTf.getText)
     config.setPrivateKeyPath(prvPathTf.getText)
+    config.setExecutionEncryptionMode(encTgl.selected.value)
     val mngr = new ConfigManager(new Gson(), cacheDir)
     mngr.save(config)
   }
@@ -326,7 +313,7 @@ class MainAppController(val pubPathTf: TextField, val browsePubBtn: Button,
 
   private def toggleContents(isEnc: Boolean): Unit = {
     if (isEnc) {
-      encLbl.setText("Mode: Encryption")
+      encLbl.setText("Encryption")
       outPathTf.disable = true
       prvPathTf.disable = true
       inPathTf.disable = false
@@ -338,7 +325,7 @@ class MainAppController(val pubPathTf: TextField, val browsePubBtn: Button,
       browsePubBtn.disable = false
       browsePkgBtn.disable = false
     } else {
-      encLbl.setText("Mode: Decryption")
+      encLbl.setText("Decryption")
       outPathTf.disable = false
       prvPathTf.disable = false
       inPathTf.disable = true
@@ -373,6 +360,8 @@ class MainAppController(val pubPathTf: TextField, val browsePubBtn: Button,
   override def setConfig(config: Config): Unit = this.config = config
 
   override def setCacheDirectoryPath(cacheDir: String): Unit = this.cacheDir = cacheDir
+
+  override def loadDefaultSetting: Unit = this.handleDefaultSettingLoad
 }
 
 import com.mickey305.openssl.wrapper.scalafx.plugin.{ExcelExporter => Exporter}

@@ -80,6 +80,7 @@ object MainApp extends JFXApp {
     controller.setTmpPath(tmpPath)
     controller.setConfig(config)
     controller.setCacheDirectoryPath(cachePath)
+    controller.loadDefaultSetting
 
     stage = new JFXApp.PrimaryStage() {
       title = "Openssl Wrapper App"

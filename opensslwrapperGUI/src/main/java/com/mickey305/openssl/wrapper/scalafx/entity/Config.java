@@ -7,14 +7,16 @@ package com.mickey305.openssl.wrapper.scalafx.entity;
 public class Config {
     public String publicKeyPath;
     public String privateKeyPath;
+    public boolean executionEncryptionMode;
 
     public Config() {
-        this("", "");
+        this("", "", true);
     }
 
-    public Config(String publicKeyPath, String privateKeyPath) {
+    public Config(String publicKeyPath, String privateKeyPath, boolean executionEncryptionMode) {
         this.setPublicKeyPath(publicKeyPath);
         this.setPrivateKeyPath(privateKeyPath);
+        this.setExecutionEncryptionMode(executionEncryptionMode);
     }
 
     public String getPublicKeyPath() {
@@ -31,5 +33,13 @@ public class Config {
 
     public void setPrivateKeyPath(String privateKeyPath) {
         this.privateKeyPath = privateKeyPath;
+    }
+
+    public boolean isExecutionEncryptionMode() {
+        return executionEncryptionMode;
+    }
+
+    public void setExecutionEncryptionMode(boolean executionEncryptionMode) {
+        this.executionEncryptionMode = executionEncryptionMode;
     }
 }
