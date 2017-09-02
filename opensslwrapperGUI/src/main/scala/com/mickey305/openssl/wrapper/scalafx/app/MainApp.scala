@@ -45,7 +45,7 @@ import scalafxml.core.{FXMLLoader, NoDependencyResolver}
 object MainApp extends JFXApp {
   private val tmpRootDirPath = getSystemTmpDir +
     "JFXAppWork" + createUniqueTime("yyyyMMddHHmmssSSS") + File.separator
-  private var home = System.getenv("HOME")
+  private var home = System.getProperty("user.home")
   home = if (home.endsWith(File.separator)) home else home + File.separator
   private val cachePath = home + ".opensslWrapperConfig" + File.separator
 

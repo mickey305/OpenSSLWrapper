@@ -18,7 +18,7 @@ import com.mickey305.openssl.wrapper.actor.utils.IdCache
 object SampleMain extends App {
   val THREAD_NUM = 60
 
-  var home = System.getenv("HOME")
+  var home = System.getProperty("user.home")
   home = if (home.endsWith(File.separator)) home else home + File.separator
 
   // clean test output contents
