@@ -29,7 +29,7 @@ lazy val sample = (project in file("sample")).
       "jitpack" at "https://jitpack.io"
     ),
     libraryDependencies ++= Seq(
-      "com.github.mickey305"      % "Jclic"                 % "0.1.5_15",
+      "com.github.mickey305"      % "Jclic"                 % "0.1.5_17",
       "com.typesafe.akka"         %% "akka-actor"           % "2.4.12"
     )
   )
@@ -46,8 +46,9 @@ lazy val opensslwrapper = (project in file("opensslwrapper")).
     ),
     libraryDependencies ++= Seq(
       "com.typesafe"              % "config"                % "1.3.1",
-      "com.github.mickey305"      % "Jclic"                 % "0.1.5_15",
-      "com.github.mickey305"      % "FileCompressFramework" % "0.0.2-SNAPSHOT",
+      "com.github.mickey305"      % "Jclic"                 % "0.1.5_17",
+      "com.github.mickey305"      % "FileCompressFramework" % "0.0.2-SNAPSHOT_03",
+      "com.github.mickey305"      % "FPBridge4j"            % "0.7.0",
       // https://mvnrepository.com/artifact/commons-io/commons-io
       "commons-io"                % "commons-io"            % "2.5",
       // https://mvnrepository.com/artifact/org.apache.commons/commons-lang3
@@ -73,8 +74,9 @@ lazy val opensslwrapperGUI = (project in file("opensslwrapperGUI")).
       "org.scalafx"               % "scalafxml-core-sfx8_2.12"   % "0.4",
       "org.scala-lang.modules"    % "scala-java8-compat_2.12"    % "0.8.0",
       "com.typesafe"              % "config"                     % "1.3.1",
-      "com.github.mickey305"      % "Jclic"                      % "0.1.5_15",
-      "com.github.mickey305"      % "FileCompressFramework"      % "0.0.2-SNAPSHOT",
+      "com.github.mickey305"      % "Jclic"                      % "0.1.5_17",
+      "com.github.mickey305"      % "FileCompressFramework"      % "0.0.2-SNAPSHOT_03",
+      "com.github.mickey305"      % "FPBridge4j"                 % "0.7.0",
       // https://mvnrepository.com/artifact/commons-io/commons-io
       "commons-io"                % "commons-io"                 % "2.5",
       // https://mvnrepository.com/artifact/org.apache.commons/commons-lang3
