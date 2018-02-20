@@ -31,9 +31,9 @@ import scalafx.beans.property.{IntegerProperty, LongProperty, ObjectProperty, St
   * Created by K.Misaki on 2017/07/31.
   *
   */
-class Log(id_ : Long, pid_ : Int, cmd_ : String, start_ : Timestamp, end_ : Timestamp) {
+class Log(id_ : Long, pid_ : String, cmd_ : String, start_ : Timestamp, end_ : Timestamp) {
   val id = new LongProperty(this, "id", id_)
-  val pid = new IntegerProperty(this, "pid", pid_)
+  val pid = new StringProperty(this, "pid", pid_)
   val cmd = new StringProperty(this, "cmd", cmd_)
   val start = new ObjectProperty[Timestamp](this, "start", start_)
   val end = new ObjectProperty[Timestamp](this, "end", end_)
@@ -42,9 +42,9 @@ class Log(id_ : Long, pid_ : Int, cmd_ : String, start_ : Timestamp, end_ : Time
 
   def getId(): Long = this.id.get
 
-  def setPid(pid: Int): Unit = this.pid.set(pid)
+  def setPid(pid: String): Unit = this.pid.set(pid)
 
-  def getPid(): Int = this.pid.get
+  def getPid(): String = this.pid.get
 
   def setCmd(cmd: String): Unit = this.cmd.set(cmd)
 

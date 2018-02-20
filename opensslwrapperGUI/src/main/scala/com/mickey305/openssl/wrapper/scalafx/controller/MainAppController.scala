@@ -120,7 +120,7 @@ class MainAppController(val pubPathTf: TextField, val browsePubBtn: Button,
       if (inPathTf.getText.isEmpty && file != null) {
         file = new File(file.getCanonicalPath + File.separator + "Target.encbox")
       } else if (file != null) {
-        val fary = inPathTf.getText.split(File.separator, -1)
+        val fary = inPathTf.getText.split(if (File.separator.equals("\\")) "\\\\" else File.separator, -1)
         val fnameAll = fary(fary.size - 1)
         val fname = fnameAll.substring(0, fnameAll.lastIndexOf("."))
         file = new File(file.getCanonicalPath + File.separator + (
@@ -233,7 +233,7 @@ class MainAppController(val pubPathTf: TextField, val browsePubBtn: Button,
           items.add(
             new Log(
               journal.getId + idOffset,
-              journal.getPid,
+              if (journal.getPid < 0) "N/A" else String.valueOf(journal.getPid),
               journal.getExecutionSentence,
               journal.getTimestampMaps.get(Benchmark.START),
               journal.getTimestampMaps.get(Benchmark.END)))

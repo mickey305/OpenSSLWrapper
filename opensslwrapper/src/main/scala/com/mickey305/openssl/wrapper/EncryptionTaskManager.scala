@@ -41,6 +41,7 @@ class EncryptionTaskManager(callbackCmdSearch: Option[Unit => OpenSSLCommand] = 
   var journalManager: JournalManager = _
 
   private val leftHyphen = (v: String) => if (v.startsWith("-")) v else "-" + v
+  private val wrapDq = (v: String) => "\"" + v + "\""
   private var invoker = new TermInvoker[TerminalCommand]
   private var openssl: OpenSSLCommand = OpenSSLCommand.create(status => cmdStatus = status)
   if (!cmdStatus) {
@@ -73,13 +74,14 @@ class EncryptionTaskManager(callbackCmdSearch: Option[Unit => OpenSSLCommand] = 
     // default setting
     OptionKey.ShareKeyLength -> 32.toString
   )): Unit = {
-    // openssl rand 32 -out {SHARE_KEY_FILE} [-base64]
+    // openssl rand [-base64] 32 > {SHARE_KEY_FILE}
     if (!cmdStatus) return
     val cmd = openssl.clone.receiver(receiver)
-      .option(opensslConfig.randValue, options(OptionKey.ShareKeyLength))
-      .option(leftHyphen.apply("out"), kPath)
+      .option(opensslConfig.randValue)
     if (opensslConfig.base64)
       cmd.option(leftHyphen.apply(opensslConfig.base64Value))
+    cmd.option(options(OptionKey.ShareKeyLength))
+      .option(">", wrapDq.apply(kPath))
     invoker.add(cmd)
   }
 
@@ -88,9 +90,9 @@ class EncryptionTaskManager(callbackCmdSearch: Option[Unit => OpenSSLCommand] = 
     if (!cmdStatus) return
     val cmd = openssl.clone.receiver(receiver)
       .option(opensslConfig.algorithm, leftHyphen.apply("e"))
-      .option(leftHyphen.apply("in"), inPath)
-      .option(leftHyphen.apply("out"), outPath)
-      .option(leftHyphen.apply("pass"), "file:" + kPath)
+      .option(leftHyphen.apply("in"), wrapDq.apply(inPath))
+      .option(leftHyphen.apply("out"), wrapDq.apply(outPath))
+      .option(leftHyphen.apply("pass"), "file:" + wrapDq.apply(kPath))
     if (opensslConfig.base64)
       cmd.option(leftHyphen.apply(opensslConfig.base64Value))
     invoker.add(cmd)
@@ -101,9 +103,9 @@ class EncryptionTaskManager(callbackCmdSearch: Option[Unit => OpenSSLCommand] = 
     if (!cmdStatus) return
     val cmd = openssl.clone.receiver(receiver)
       .option(opensslConfig.algorithm, leftHyphen.apply("d"))
-      .option(leftHyphen.apply("in"), inPath)
-      .option(leftHyphen.apply("out"), outPath)
-      .option(leftHyphen.apply("pass"), "file:" + kPath)
+      .option(leftHyphen.apply("in"), wrapDq.apply(inPath))
+      .option(leftHyphen.apply("out"), wrapDq.apply(outPath))
+      .option(leftHyphen.apply("pass"), "file:" + wrapDq.apply(kPath))
     if (opensslConfig.base64)
       cmd.option(leftHyphen.apply(opensslConfig.base64Value))
     invoker.add(cmd)
@@ -117,7 +119,7 @@ class EncryptionTaskManager(callbackCmdSearch: Option[Unit => OpenSSLCommand] = 
     if (!cmdStatus) return
     val cmd = openssl.clone.receiver(receiver)
       .option(opensslConfig.genRsaValue, options(OptionKey.PrivateKeyLength))
-      .option(">", privateKeyPath)
+      .option(">", wrapDq.apply(privateKeyPath))
     invoker.add(cmd)
   }
 
@@ -126,8 +128,8 @@ class EncryptionTaskManager(callbackCmdSearch: Option[Unit => OpenSSLCommand] = 
     if (!cmdStatus) return
     val cmd = openssl.clone.receiver(receiver)
       .option(opensslConfig.rsaValue)
-      .option(leftHyphen.apply("in"), privateKeyPath)
-      .option(leftHyphen.apply("pubout")).option(leftHyphen.apply("out"), publicKeyPath)
+      .option(leftHyphen.apply("in"), wrapDq.apply(privateKeyPath))
+      .option(leftHyphen.apply("pubout")).option(leftHyphen.apply("out"), wrapDq.apply(publicKeyPath))
     invoker.add(cmd)
   }
 
@@ -137,9 +139,9 @@ class EncryptionTaskManager(callbackCmdSearch: Option[Unit => OpenSSLCommand] = 
     val cmd = openssl.clone.receiver(receiver)
       .option(opensslConfig.rsaUtilValue, leftHyphen.apply("encrypt"))
       .option(leftHyphen.apply("pubin"))
-      .option(leftHyphen.apply("inkey"), kPath)
-      .option(leftHyphen.apply("in"), inPath)
-      .option(leftHyphen.apply("out"), outPath)
+      .option(leftHyphen.apply("inkey"), wrapDq.apply(kPath))
+      .option(leftHyphen.apply("in"), wrapDq.apply(inPath))
+      .option(leftHyphen.apply("out"), wrapDq.apply(outPath))
     invoker.add(cmd)
   }
 
@@ -148,9 +150,9 @@ class EncryptionTaskManager(callbackCmdSearch: Option[Unit => OpenSSLCommand] = 
     if (!cmdStatus) return
     val cmd = openssl.clone.receiver(receiver)
       .option(opensslConfig.rsaUtilValue, leftHyphen.apply("decrypt"))
-      .option(leftHyphen.apply("inkey"), kPath)
-      .option(leftHyphen.apply("in"), inPath)
-      .option(leftHyphen.apply("out"), outPath)
+      .option(leftHyphen.apply("inkey"), wrapDq.apply(kPath))
+      .option(leftHyphen.apply("in"), wrapDq.apply(inPath))
+      .option(leftHyphen.apply("out"), wrapDq.apply(outPath))
     invoker.add(cmd)
   }
 

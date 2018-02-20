@@ -27,12 +27,13 @@ import java.awt.Desktop
 import java.io._
 import java.net.URL
 import java.nio.file.{Files, Paths}
-import java.nio.file.attribute.PosixFilePermissions
 import java.text.SimpleDateFormat
+import java.util
 import java.util.Calendar
 import javafx.{scene => jfxs}
 
 import com.google.gson.Gson
+import com.mickey305.fpbridge.v1.{FPArgument, FilePermissionsDriver}
 import com.mickey305.openssl.wrapper.actor.utils.IdCache
 import com.mickey305.openssl.wrapper.scalafx.controller.MainAppControllerInterface
 import com.mickey305.openssl.wrapper.scalafx.entity.Config
@@ -127,13 +128,15 @@ object MainApp extends JFXApp {
     * @param permission
     * @return
     */
-  private def createFolder(folderName: String, permission: String = "rwx------"): Boolean = {
+  private def createFolder(folderName: String, permission: FPArgument = FPArgument.newAllowOwner): Boolean = {
     val folder = new File(folderName)
     if (!folder.exists) {
       folder.getParentFile.mkdirs()
+      val args = new util.HashSet[FPArgument]
+      args.add(permission)
       Files.createDirectory(
         Paths.get(folder.getCanonicalPath),
-        PosixFilePermissions.asFileAttribute(PosixFilePermissions.fromString(permission)))
+        FilePermissionsDriver.createByFPArgument(args))
       return folder.exists
     }
     false

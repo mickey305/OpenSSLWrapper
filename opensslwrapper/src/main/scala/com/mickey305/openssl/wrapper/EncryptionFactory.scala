@@ -27,8 +27,10 @@ import java.io.File
 import java.nio.file.attribute.PosixFilePermissions
 import java.nio.file.{Files, Paths}
 import java.text.SimpleDateFormat
+import java.util
 import java.util.Calendar
 
+import com.mickey305.fpbridge.v1.{FPArgument, FilePermissionsDriver}
 import com.mickey305.openssl.wrapper.actor.utils.IdCache
 import com.mickey305.openssl.wrapper.config.model.{Contents, OpenSSL}
 import com.mickey305.openssl.wrapper.exception.FilePathException
@@ -95,7 +97,7 @@ class EncryptionFactory {
       opensslCfg.path = tmpDirPath
       opensslCfg.save
       contentsCfg.path = tmpDirPath
-      contentsCfg.fileName = targetFilePath.split(File.separator).last
+      contentsCfg.fileName = targetFilePath.split(if (File.separator.equals("\\")) "\\\\" else File.separator).last
       contentsCfg.save
       val shareKey = new File(shareKeyPath)
       val delete = shareKey.delete
@@ -171,13 +173,15 @@ class EncryptionFactory {
     * @param permission
     * @return
     */
-  private def createFolder(folderName: String, permission: String = "rwx------"): Boolean = {
+  private def createFolder(folderName: String, permission: FPArgument = FPArgument.newAllowOwner): Boolean = {
     val folder = new File(folderName)
     if (!folder.exists) {
       folder.getParentFile.mkdirs()
+      val args = new util.HashSet[FPArgument]
+      args.add(permission)
       Files.createDirectory(
         Paths.get(folder.getCanonicalPath),
-        PosixFilePermissions.asFileAttribute(PosixFilePermissions.fromString(permission)))
+        FilePermissionsDriver.createByFPArgument(args))
       return folder.exists
     }
     false
