@@ -1,3 +1,4 @@
+import sbt.Keys.packageOptions
 
 lazy val compilecheck = taskKey[Unit]("compile and then scalastyle")
 
@@ -62,7 +63,7 @@ lazy val opensslwrapperGUI = (project in file("opensslwrapperGUI")).
   settings(
     name := "OpenSSLWrapperGUI",
     scalacOptions += "-deprecation",
-//    assemblyJarName in assembly := "opensslwrapperGUI.jar",
+    assemblyJarName in assembly := "opensslwrapperGUI.jar",
     mainClass in assembly := Some("com.mickey305.openssl.wrapper.scalafx.app.MainApp"),
     resolvers ++= Seq(
       "Typesafe Repository" at "http://repo.typesafe.com/typesafe/releases/",
@@ -95,5 +96,10 @@ lazy val opensslwrapperGUI = (project in file("opensslwrapperGUI")).
     addCompilerPlugin(
       "org.scalamacros"           % "paradise"                   % "2.1.0" cross CrossVersion.full
     ),
-    sources in (Compile, doc) := Seq.empty
+    sources in (Compile, doc) := Seq.empty,
+    packageOptions in (Compile, packageBin) +=  {
+      val file = new java.io.File("opensslwrapperGUI/META-INF/MANIFEST.MF")
+      val manifest = Using.fileInputStream(file)( in => new java.util.jar.Manifest(in) )
+      Package.JarManifest( manifest )
+    }
   )

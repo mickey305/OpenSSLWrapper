@@ -67,4 +67,4 @@ project/plugins/project/
 *.json
 
 # manifest file
-*.MF
+#*.MF
