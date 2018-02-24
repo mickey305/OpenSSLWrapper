@@ -1,7 +1,7 @@
 <scalastyle commentFilter="enabled">
  <name>Scalastyle standard configuration</name>
  <check level="error" class="org.scalastyle.file.WhitespaceEndOfLineChecker" enabled="true"/>
- <check level="error" class="org.scalastyle.scalariform.UnderscoreImportChecker" enabled="true"/>
+ <check level="warning" class="org.scalastyle.scalariform.UnderscoreImportChecker" enabled="true"/>
  <check level="warning" class="org.scalastyle.file.FileTabChecker" enabled="true"/>
  <check level="warning" class="org.scalastyle.file.FileLengthChecker" enabled="true">
   <parameters>
