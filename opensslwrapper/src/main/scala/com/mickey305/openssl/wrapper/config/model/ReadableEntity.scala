@@ -23,7 +23,7 @@
 //
 package com.mickey305.openssl.wrapper.config.model
 
-import java.io.{File, FileReader, Reader}
+import java.io._
 import java.util.Properties
 
 import com.mickey305.openssl.wrapper.ConfigObject
@@ -67,7 +67,8 @@ trait ReadableEntity {
     val separator = File.separator
     var ioPath = new File(getPath).getCanonicalPath
     ioPath = if (ioPath.isEmpty || ioPath.endsWith(separator)) ioPath else ioPath + separator
-    val reader = new FileReader(ioPath + file)
+    val reader = new BufferedReader(new InputStreamReader(new FileInputStream(ioPath + file), "UTF-8"))
+//    val reader = new FileReader(ioPath + file)
     try op(reader)
     finally reader.close()
   }

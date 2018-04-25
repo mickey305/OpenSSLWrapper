@@ -59,7 +59,7 @@ trait WritableEntity {
     var ioPath = new File(getPath).getCanonicalPath
     createFolder(ioPath)
     ioPath = if (ioPath.isEmpty || ioPath.endsWith(separator)) ioPath else ioPath + separator
-    val writer = new PrintWriter(ioPath + file)
+    val writer = new PrintWriter(ioPath + file, "UTF-8")
     try op(writer)
     finally writer.close()
   }

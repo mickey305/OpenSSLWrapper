@@ -39,6 +39,8 @@ import com.mickey305.util.cli.JournalManager
 import com.mickey305.util.cli.receivers.ResultAccessibleReceiver
 import com.mickey305.util.file.zip.ZipComponent
 import org.apache.commons.io.FileUtils
+import org.apache.commons.io.filefilter.WildcardFileFilter
+import org.apache.tools.ant.DirectoryScanner
 
 /**
   * Created by K.Misaki on 2017/06/03.
@@ -52,9 +54,9 @@ class EncryptionFactory {
   private val encryptionFileExt = ".encrypted"
   private val tmpRootDirPath = getSystemTmpDir +
     "work" + createUniqueTime("yyyyMMddHHmmssSSS") + File.separator
-  private val tmpDirPath = tmpRootDirPath + this.getClass.getName + File.separator
-  private val contentsFilePath = tmpDirPath + "contents" + encryptionFileExt
+  private var tmpDirPath = tmpRootDirPath + this.getClass.getName + File.separator
   private val contentsCfg = new Contents
+  private val boxedContentsFileName = "contents"
 
   // default setting
   opensslCfg.shareKey = createUniqueTime("yyyyMMddHHmmssSSS") + ".share.key"
@@ -83,6 +85,7 @@ class EncryptionFactory {
     val shareKeyPath = tmpDirPath + opensslCfg.shareKey
     val encShareKeyPath = shareKeyPath + encryptionFileExt
     val publicKeyPath = opensslCfg.publicKey
+    val contentsFilePath = tmpDirPath + boxedContentsFileName + encryptionFileExt
     cliTskMngr.subscribeShareKeyCreator(opensslCfg, shareKeyPath)
     cliTskMngr.subscribePKeyEncryption(opensslCfg, publicKeyPath, shareKeyPath, encShareKeyPath)
     cliTskMngr.subscribeShareKeyEncryption(opensslCfg, shareKeyPath, targetFilePath, contentsFilePath)
@@ -133,6 +136,13 @@ class EncryptionFactory {
       // UnZIP
       ZipComponent.decompress(packageFilePath, tmpRootDirPath, (_, _) => {
         val privateKeyPath = opensslCfg.privateKey
+        val scanner = new DirectoryScanner
+        scanner.setIncludes(Array[String]("**/*.properties", "**/*.key"))
+        scanner.setBasedir(tmpRootDirPath)
+        scanner.setCaseSensitive(false)
+        scanner.scan()
+        val files = scanner.getIncludedFiles
+        tmpDirPath = tmpRootDirPath + files(0).replace(files(0).split(if (File.separator.equals("\\")) "\\\\" else File.separator).last, "")
         // Decryption Task
         opensslCfg.path = tmpDirPath
         opensslCfg.load
@@ -146,6 +156,7 @@ class EncryptionFactory {
             case Some(status) => if(!status(infoVersion, thisVersion)) return }
         val shareKeyPath = tmpDirPath + opensslCfg.shareKey
         val encShareKeyPath = shareKeyPath + encryptionFileExt
+        val contentsFilePath = tmpDirPath + boxedContentsFileName + encryptionFileExt
         cliTskMngr.subscribePKeyDecryption(opensslCfg, privateKeyPath, encShareKeyPath, shareKeyPath)
         cliTskMngr.subscribeShareKeyDecryption(opensslCfg, shareKeyPath, contentsFilePath, outPath + contentsCfg.fileName)
         // execution
